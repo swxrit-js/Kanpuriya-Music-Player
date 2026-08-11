@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+@layer utilities {
+  .font-hindi-display {
+    font-family: 'Yatra One', 'Rozha One', 'Hind', serif;
+  }
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: #0c1319;
+  color: #e6e0d2;
+}
+

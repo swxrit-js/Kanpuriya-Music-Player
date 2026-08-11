@@ -1,0 +1,6 @@
+{
+  "name": "Desi Barf Ka Gola",
+  "description": "Gaane Suno. Gola Banao. Mood Banao. An immersive Indian street music player and interactive Barf Ka Gola creator.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,66 @@
+{
+  "entities": {
+    "users": {
+      "title": "Users",
+      "description": "User profiles and roles",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "avatar": { "type": "string" },
+        "role": { "type": "string" },
+        "favorites": { "type": "array", "items": { "type": "string" } },
+        "favoriteGolas": { "type": "array", "items": { "type": "string" } },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "email", "role"]
+    },
+    "users/golaRecipes": {
+      "title": "Saved Gola Recipes",
+      "description": "User custom gola recipes",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "baseIce": { "type": "string" },
+        "containerId": { "type": "string" },
+        "decorationId": { "type": "string" },
+        "createdBy": { "type": "string" },
+        "createdByName": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "likes": { "type": "number" }
+      },
+      "required": ["id", "name", "createdBy"]
+    },
+    "playlists": {
+      "title": "User Playlists",
+      "description": "Custom playlists created by users",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "coverUrl": { "type": "string" },
+        "createdBy": { "type": "string" },
+        "createdByName": { "type": "string" },
+        "isPublic": { "type": "boolean" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "title", "createdBy"]
+    },
+    "feedback": {
+      "title": "User Feedback and Chai Stall Reviews",
+      "description": "Feedback submitted by users",
+      "properties": {
+        "id": { "type": "string" },
+        "category": { "type": "string" },
+        "rating": { "type": "number" },
+        "message": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "userEmail": { "type": "string" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "message"]
+    }
+  }
+}
