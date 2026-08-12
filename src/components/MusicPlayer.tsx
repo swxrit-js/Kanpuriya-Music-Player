@@ -42,17 +42,36 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
   const [showLyrics, setShowLyrics] = useState(false);
   const [showPlaylistDropdown, setShowPlaylistDropdown] = useState(false);
 
-  // Sync audio play/pause state
+  const [audioError, setAudioError] = useState<string | null>(null);
+
+  const loadedSongIdRef = useRef<string>('');
+
+  // Sync audio play/pause state and handle song change
   useEffect(() => {
     const audio = audioRef.current;
-    if (!audio) return;
+    if (!audio || !currentSong) return;
+
+    setAudioError(null);
+
+    // Only set src and load if song ID or audio URL changed
+    const songKey = `${currentSong.id}_${currentSong.audioUrl}`;
+    if (loadedSongIdRef.current !== songKey) {
+      loadedSongIdRef.current = songKey;
+      audio.src = currentSong.audioUrl || '';
+      audio.load();
+    }
 
     if (isPlaying) {
       const playPromise = audio.play();
       if (playPromise !== undefined) {
-        playPromise.catch(() => {
-          // Fallback Web Audio API synth if audio element fails
-          playSynthFallback();
+        playPromise.catch((err) => {
+          console.warn("Audio play error:", err);
+          if (err.name === 'NotAllowedError') {
+            setAudioError("Click ▶ Play on bottom player to enable audio.");
+          } else {
+            setAudioError("Audio stream error. Playing synth fallback...");
+            playSynthFallback();
+          }
         });
       }
     } else {
@@ -70,16 +89,20 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
       if (ctx.state === 'suspended') {
         ctx.resume();
       }
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(320, ctx.currentTime);
-      gain.gain.setValueAtTime(0.05, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.5);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 1.5);
+      
+      // Play a pleasant 3-note chime chord
+      [261.63, 329.63, 392.00].forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.1);
+        gain.gain.setValueAtTime(0.08, ctx.currentTime + idx * 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.1 + 1.2);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime + idx * 0.1);
+        osc.stop(ctx.currentTime + idx * 0.1 + 1.2);
+      });
     } catch (e) {
       // Audio synth silent fallback
     }
@@ -148,10 +171,13 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
       {/* HTML5 Audio element */}
       <audio
         ref={audioRef}
-        src={currentSong.audioUrl}
         onTimeUpdate={handleTimeUpdate}
         onEnded={handleEnded}
         onLoadedMetadata={handleTimeUpdate}
+        onError={() => {
+          setAudioError("Audio stream error. Playing synth chord fallback...");
+          playSynthFallback();
+        }}
       />
 
       {/* PERSISTENT MINI PLAYER LAYOUT */}

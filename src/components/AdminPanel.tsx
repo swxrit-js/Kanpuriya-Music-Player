@@ -467,13 +467,76 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   </div>
 
                   <div>
-                    <label className="text-[#8a9aa8] block mb-1 font-mono">Audio URL (MP3 link)</label>
-                    <input type="text" value={audioUrl} onChange={e => setAudioUrl(e.target.value)} className="w-full bg-[#0c1319] border border-white/10 p-2.5 rounded-xl text-[#f5eedc] font-mono text-[11px]" required />
+                    <label className="text-[#8a9aa8] block mb-1 font-mono">Audio Track (Upload file or paste MP3 link)</label>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <label className="flex-1 cursor-pointer bg-[#18232c] hover:bg-[#1f2d38] border border-dashed border-amber-500/40 p-2.5 rounded-xl text-center text-amber-300 text-xs transition-colors flex items-center justify-center gap-1.5">
+                          <Upload className="w-4 h-4" />
+                          <span>Choose Audio File (MP3 / WEBM / MP4)</span>
+                          <input
+                            type="file"
+                            accept="audio/*,video/mp4,video/webm,.webm,.mp4,.mp3,.m4a"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                const reader = new FileReader();
+                                reader.onload = (event) => {
+                                  if (event.target?.result) {
+                                    setAudioUrl(event.target.result as string);
+                                  }
+                                };
+                                reader.readAsDataURL(file);
+                              }
+                            }}
+                          />
+                        </label>
+                      </div>
+                      <input
+                        type="text"
+                        value={audioUrl}
+                        onChange={e => setAudioUrl(e.target.value)}
+                        placeholder="OR paste direct https://.../song.mp3 link"
+                        className="w-full bg-[#0c1319] border border-white/10 p-2.5 rounded-xl text-[#f5eedc] font-mono text-[11px]"
+                        required
+                      />
+                      <div className="flex items-center gap-1.5 flex-wrap text-[10px] text-[#8a9aa8]">
+                        <span>Presets:</span>
+                        <button
+                          type="button"
+                          onClick={() => setAudioUrl('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3')}
+                          className="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700"
+                        >
+                          🎵 SoundHelix Beats 1
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setAudioUrl('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3')}
+                          className="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700"
+                        >
+                          🔥 SoundHelix Beats 2
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setAudioUrl('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3')}
+                          className="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700"
+                        >
+                          🎸 SoundHelix Beats 3
+                        </button>
+                      </div>
+                    </div>
                   </div>
 
                   <div>
                     <label className="text-[#8a9aa8] block mb-1 font-mono">Cover Image URL</label>
-                    <input type="text" value={coverUrl} onChange={e => setCoverUrl(e.target.value)} className="w-full bg-[#0c1319] border border-white/10 p-2.5 rounded-xl text-[#f5eedc] font-mono text-[11px]" required />
+                    <input
+                      type="text"
+                      value={coverUrl}
+                      onChange={e => setCoverUrl(e.target.value)}
+                      placeholder="https://images.unsplash.com/..."
+                      className="w-full bg-[#0c1319] border border-white/10 p-2.5 rounded-xl text-[#f5eedc] font-mono text-[11px]"
+                      required
+                    />
                   </div>
 
                   {playlists.length > 0 && (

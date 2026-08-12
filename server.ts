@@ -7,6 +7,11 @@ const PORT = 3000;
 
 app.use(express.json());
 
+// Serve static assets from 'song' or 'public' directories if present
+app.use('/song', express.static(path.join(process.cwd(), 'song')));
+app.use('/public', express.static(path.join(process.cwd(), 'public')));
+app.use(express.static(path.join(process.cwd(), 'public')));
+
 // IN-MEMORY / DB PERSISTENT REST API LAYER
 let songsList = [
   {

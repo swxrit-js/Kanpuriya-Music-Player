@@ -302,7 +302,120 @@ export const INITIAL_DECORATIONS: GolaDecoration[] = [
   }
 ];
 
-export const INITIAL_SONGS: Song[] = [];
+export const INITIAL_SONGS: Song[] = [
+  {
+    id: 'song_1',
+    title: 'Kanpuriya Barf Ka Gola Lofi',
+    artist: 'Desi Beat Masters',
+    album: 'Kanpur Street Vibe',
+    duration: 212,
+    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+    coverUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=600&auto=format&fit=crop',
+    genre: 'Lofi Street',
+    language: 'Hindi',
+    mood: 'chill',
+    featured: true,
+    trending: true,
+    playsCount: 14200,
+    likesCount: 1205
+  },
+  {
+    id: 'song_2',
+    title: 'Kala Khatta Groove',
+    artist: 'DJ Kanpuria',
+    album: 'Barf Masala',
+    duration: 185,
+    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+    coverUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=600&auto=format&fit=crop',
+    genre: 'Desi EDM',
+    language: 'Bhojpuri',
+    mood: 'party',
+    featured: true,
+    trending: true,
+    playsCount: 28900,
+    likesCount: 2310
+  },
+  {
+    id: 'song_3',
+    title: 'Chai & Ganga Ghat Sunset',
+    artist: 'The Street Ghazal Club',
+    album: 'Ghat Evenings',
+    duration: 240,
+    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3',
+    coverUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=600&auto=format&fit=crop',
+    genre: 'Acoustic Folk',
+    language: 'Hindi',
+    mood: 'latenight',
+    featured: false,
+    trending: true,
+    playsCount: 18400,
+    likesCount: 1980
+  },
+  {
+    id: 'song_4',
+    title: 'Dhaakad Barf Highway',
+    artist: 'Swag Jaat & Crew',
+    album: 'High Speed Chill',
+    duration: 198,
+    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-16.mp3',
+    coverUrl: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?q=80&w=600&auto=format&fit=crop',
+    genre: 'Haryanvi Beat',
+    language: 'Haryanvi',
+    mood: 'roadtrip',
+    featured: true,
+    trending: false,
+    playsCount: 22100,
+    likesCount: 1840
+  },
+  {
+    id: 'song_alag_aasmaan',
+    title: 'Alag Aasmaan',
+    artist: 'Anuv Jain',
+    album: 'Indie Ukulele',
+    duration: 210,
+    audioUrl: '/song/Anuv_Jain_-_ALAG_AASMAAN_a_song_on_the_ukulele_low.mp4',
+    coverUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=600&auto=format&fit=crop',
+    genre: 'Indie Acoustic',
+    language: 'Hindi',
+    mood: 'chill',
+    featured: true,
+    trending: true,
+    playsCount: 35000,
+    likesCount: 4200
+  },
+  {
+    id: 'song_choo_lo',
+    title: 'Choo Lo',
+    artist: 'The Local Train',
+    album: 'Aalas Ka Pedh',
+    duration: 234,
+    audioUrl: '/song/The_Local_Train_-_Aalas_Ka_Pedh_-_Choo_Lo_Official_Audio_256kbps.webm',
+    coverUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=600&auto=format&fit=crop',
+    genre: 'Indie Rock',
+    language: 'Hindi',
+    mood: 'latenight',
+    featured: true,
+    trending: true,
+    playsCount: 48000,
+    likesCount: 5600
+  },
+  {
+    id: 'song_khat',
+    title: 'Khat',
+    artist: 'Navjot Ahuja',
+    album: 'Khat Single',
+    duration: 190,
+    audioUrl: '/song/Navjot_Ahuja_-_Khat_Official_Audio_256KBPS.webm',
+    coverUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=600&auto=format&fit=crop',
+    genre: 'Acoustic Pop',
+    language: 'Hindi',
+    mood: 'romantic',
+    featured: false,
+    trending: true,
+    playsCount: 19000,
+    likesCount: 2100
+  }
+];
 
 export const INITIAL_PLAYLISTS: Playlist[] = [];
 

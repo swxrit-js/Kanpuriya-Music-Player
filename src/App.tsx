@@ -170,11 +170,16 @@ export default function App() {
           id: doc.id,
           ...doc.data()
         } as Song));
-        setSongs(firestoreSongs);
+        const fsIds = new Set(firestoreSongs.map(s => s.id));
+        const combined = [...firestoreSongs, ...INITIAL_SONGS.filter(s => !fsIds.has(s.id))];
+        setSongs(combined);
       } else {
-        setSongs([]);
+        setSongs(INITIAL_SONGS);
       }
-    }, (err) => console.log("Songs snapshot listener:", err));
+    }, (err) => {
+      console.log("Songs snapshot listener fallback:", err);
+      setSongs(INITIAL_SONGS);
+    });
 
     // 4. Playlists collection snapshot
     const unsubPlaylists = onSnapshot(collection(db, 'playlists'), (snapshot) => {
@@ -210,6 +215,13 @@ export default function App() {
       unsubBgImages();
     };
   }, []);
+
+  // Ensure currentSong is initialized
+  useEffect(() => {
+    if (songs.length > 0 && !currentSong) {
+      setCurrentSong(songs[0]);
+    }
+  }, [songs, currentSong]);
 
   // Maps for fast lookup
   const flavoursMap = React.useMemo(() => {
