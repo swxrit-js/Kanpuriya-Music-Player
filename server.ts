@@ -1,54 +1,52 @@
 import express from "express";
 import path from "path";
+import fs from "fs";
 import { createServer as createViteServer } from "vite";
 
 const app = express();
 const PORT = 3000;
 
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// Ensure 'song' and 'public' directories exist
+const songDir = path.join(process.cwd(), 'song');
+if (!fs.existsSync(songDir)) {
+  fs.mkdirSync(songDir, { recursive: true });
+}
 
 // Serve static assets from 'song' or 'public' directories if present
-app.use('/song', express.static(path.join(process.cwd(), 'song')));
+app.use('/song', express.static(songDir));
 app.use('/public', express.static(path.join(process.cwd(), 'public')));
 app.use(express.static(path.join(process.cwd(), 'public')));
 
-// IN-MEMORY / DB PERSISTENT REST API LAYER
-let songsList = [
-  {
-    id: 'song_1',
-    title: 'Gola & Chai Highway',
-    artist: 'Raju & The Streetbeats',
-    album: 'Monsoon Nights Vol. 1',
-    duration: 214,
-    audioUrl: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3',
-    coverUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500',
-    genre: 'Desi Fusion',
-    language: 'Hindi',
-    mood: 'chill',
-    lyrics: 'NIGHT TIME PAR CHAI AUR GOLA\nMera dil tu aake khola\nHighway ki hawa mein chill hai\nGola khake mood chill hai!',
-    featured: true,
-    trending: true,
-    playsCount: 14200,
-    likesCount: 3890
-  },
-  {
-    id: 'song_2',
-    title: 'Kala Khatta Groove',
-    artist: 'DJ Desi Beats ft. Simran',
-    album: 'Gola Party Anthems',
-    duration: 188,
-    audioUrl: 'https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3?filename=tropical-house-110008.mp3',
-    coverUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500',
-    genre: 'Punjabi Pop',
-    language: 'Punjabi',
-    mood: 'party',
-    lyrics: 'Kala khatta vich thoda salt mila!\nBass bajao, speaker hilao!',
-    featured: true,
-    trending: true,
-    playsCount: 28900,
-    likesCount: 7120
+// UPLOAD AUDIO API ENDPOINT
+app.post("/api/upload-audio", (req, res) => {
+  try {
+    const { filename, dataUrl } = req.body;
+    if (!dataUrl) {
+      return res.status(400).json({ error: "No dataUrl provided" });
+    }
+    const safeName = (filename || `track_${Date.now()}.mp3`).replace(/[^a-zA-Z0-9._-]/g, '_');
+    const base64Data = dataUrl.replace(/^data: audio\/\w+;base64,/, '')
+      .replace(/^data:video\/\w+;base64,/, '')
+      .replace(/^data:application\/\w+;base64,/, '')
+      .replace(/^data:[^;]+;base64,/, '');
+
+    const buffer = Buffer.from(base64Data, 'base64');
+    const filePath = path.join(songDir, safeName);
+    fs.writeFileSync(filePath, buffer);
+
+    console.log(`Successfully saved audio file: ${filePath} (${buffer.length} bytes)`);
+    res.json({ success: true, audioUrl: `/song/${safeName}` });
+  } catch (err: any) {
+    console.error("Audio upload error:", err);
+    res.status(500).json({ error: err.message || "Failed to save audio file" });
   }
-];
+});
+
+// IN-MEMORY / DB PERSISTENT REST API LAYER
+let songsList: any[] = [];
 
 let golaRecipes = [
   {

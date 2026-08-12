@@ -229,36 +229,6 @@ export const StreetEnvironment: React.FC<StreetEnvironmentProps> = ({
 
       </div>
 
-      {/* FLOATING BOTTOM MUSIC PLAYER BAR */}
-      <div className="relative z-30 pb-4 px-4 flex justify-center">
-        <div className="bg-[#141e26]/95 border border-white/15 px-6 py-2.5 rounded-full backdrop-blur-md shadow-2xl flex items-center gap-4 text-xs max-w-xl w-full justify-between">
-          <button 
-            onClick={onTogglePlay}
-            className="w-8 h-8 rounded-full bg-white text-[#0c1319] flex items-center justify-center hover:scale-105 transition-transform"
-          >
-            {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
-          </button>
-
-          <div className="flex-1 min-w-0 text-center">
-            <p className="text-[#f5eedc] font-medium truncate font-hindi-display text-sm">
-              {currentSong ? currentSong.title : 'गली में आज चाँद निकला'}
-            </p>
-            <p className="text-[10px] text-[#8a9aa8] truncate">
-              {currentSong ? `${currentSong.artist} • ${currentSong.language}` : 'Alka Yagnik • Classic Mood'}
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2 text-[#a8b5c0]">
-            <button onClick={onTogglePlay} className="p-1 hover:text-white transition-colors" title="Next Song">
-              <SkipForward className="w-4 h-4" />
-            </button>
-            <button onClick={() => onSelectTab('music')} className="p-1 hover:text-white transition-colors" title="Expand Music View">
-              <ChevronUp className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      </div>
-
       {/* FOOTER CONTACT LINE */}
       <footer className="py-2 text-center text-[11px] text-[#6b7b8a] border-t border-white/5">
         contact: barfkagola.space@gmail.com

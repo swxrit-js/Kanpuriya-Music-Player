@@ -69,8 +69,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
           if (err.name === 'NotAllowedError') {
             setAudioError("Click ▶ Play on bottom player to enable audio.");
           } else {
-            setAudioError("Audio stream error. Playing synth fallback...");
-            playSynthFallback();
+            setAudioError("Unable to play audio stream.");
           }
         });
       }
@@ -78,35 +77,6 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
       audio.pause();
     }
   }, [isPlaying, currentSong]);
-
-  // Procedural synth audio fallback so music ALWAYS produces sound!
-  const playSynthFallback = () => {
-    try {
-      if (!synthCtxRef.current) {
-        synthCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-      }
-      const ctx = synthCtxRef.current;
-      if (ctx.state === 'suspended') {
-        ctx.resume();
-      }
-      
-      // Play a pleasant 3-note chime chord
-      [261.63, 329.63, 392.00].forEach((freq, idx) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.1);
-        gain.gain.setValueAtTime(0.08, ctx.currentTime + idx * 0.1);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.1 + 1.2);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(ctx.currentTime + idx * 0.1);
-        osc.stop(ctx.currentTime + idx * 0.1 + 1.2);
-      });
-    } catch (e) {
-      // Audio synth silent fallback
-    }
-  };
 
   // Audio event listeners
   const handleTimeUpdate = () => {
@@ -163,11 +133,26 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
     return `${m}:${s < 10 ? '0' : ''}${s}`;
   };
 
-  if (!currentSong) return null;
+  if (!currentSong) {
+    return (
+      <div className="fixed bottom-3 inset-x-0 z-50 px-3 sm:px-4 pointer-events-none flex justify-center">
+        <div className="pointer-events-auto bg-[#141e26]/95 border border-[#e0a96d]/30 px-5 py-3 rounded-full backdrop-blur-xl shadow-[0_12px_35px_rgba(0,0,0,0.85)] max-w-xl w-full flex items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-[#18232c] border border-[#e0a96d]/40 flex items-center justify-center text-sm shadow-inner shrink-0 text-[#e0a96d]">
+              🎵
+            </div>
+            <div>
+              <h4 className="text-xs sm:text-sm font-bold text-[#f5eedc] font-hindi-bold">Kanpuriya Street Player</h4>
+              <p className="text-[10px] text-[#8a9aa8]">No track playing • Upload or select a song from catalog</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="fixed bottom-0 inset-x-0 z-50 bg-[#0c1319]/95 border-t border-[#e0a96d]/25 backdrop-blur-2xl px-4 py-2.5 text-[#e5dfd3] shadow-[0_-15px_40px_rgba(0,0,0,0.85)] selection:bg-[#e0a96d] selection:text-[#0c1319]">
-      
+    <div className="fixed bottom-3 inset-x-0 z-50 px-3 sm:px-4 pointer-events-none flex justify-center">
       {/* HTML5 Audio element */}
       <audio
         ref={audioRef}
@@ -175,78 +160,84 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
         onEnded={handleEnded}
         onLoadedMetadata={handleTimeUpdate}
         onError={() => {
-          setAudioError("Audio stream error. Playing synth chord fallback...");
-          playSynthFallback();
+          const src = audioRef.current?.src || '';
+          console.warn("Audio element failed to load src:", src);
+          setAudioError("Audio file unavailable. Please re-upload in Admin Panel.");
         }}
       />
 
-      {/* PERSISTENT MINI PLAYER LAYOUT */}
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-2.5 md:gap-3">
+      {/* FLOATING PILL PLAYER CONTAINER */}
+      <div className="pointer-events-auto bg-[#141e26]/95 border border-[#e0a96d]/35 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full backdrop-blur-xl shadow-[0_12px_40px_rgba(0,0,0,0.9)] max-w-3xl w-full flex items-center justify-between gap-2.5 sm:gap-4 text-xs">
         
-        {/* TOP ROW ON MOBILE / LEFT ON DESKTOP: SONG INFO, VINYL & QUICK PLAY CONTROLS */}
-        <div className="flex items-center justify-between gap-3 w-full md:w-1/3 min-w-0">
-          <div className="flex items-center gap-2.5 min-w-0 flex-1">
-            {/* Animated Rotating Vinyl Album Cover */}
-            <div className="relative group shrink-0">
-              <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden border-2 border-[#e0a96d]/40 shadow-lg relative ${isPlaying ? 'animate-spin' : ''}`} style={{ animationDuration: '8s' }}>
-                <img
-                  src={currentSong.coverUrl}
-                  alt={currentSong.title}
-                  className="w-full h-full object-cover"
-                  referrerPolicy="no-referrer"
-                />
-                {/* Vinyl Center Spindle hole */}
-                <div className="absolute inset-0 m-auto w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-[#0c1319] border border-[#e0a96d] shadow-inner" />
-              </div>
-              
-              {/* Live Playing Sound Wave Bars Indicator */}
-              {isPlaying && (
-                <div className="absolute -top-1 -right-1 flex items-end gap-0.5 bg-[#0c1319]/90 p-0.5 rounded-full border border-[#e0a96d]/40">
-                  <span className="w-1 h-2.5 bg-[#e0a96d] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <span className="w-1 h-2 bg-[#e0a96d] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <span className="w-1 h-3 bg-[#e0a96d] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                </div>
-              )}
+        {/* LEFT: VINYL COVER & TRACK METADATA */}
+        <div className="flex items-center gap-2.5 min-w-0 flex-1 sm:flex-initial">
+          {/* Animated Rotating Vinyl Album Cover */}
+          <div className="relative group shrink-0">
+            <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden border-2 border-[#e0a96d]/50 shadow-md relative ${isPlaying ? 'animate-spin' : ''}`} style={{ animationDuration: '8s' }}>
+              <img
+                src={currentSong.coverUrl}
+                alt={currentSong.title}
+                className="w-full h-full object-cover"
+                referrerPolicy="no-referrer"
+              />
+              {/* Vinyl Spindle hole */}
+              <div className="absolute inset-0 m-auto w-2.5 h-2.5 rounded-full bg-[#0c1319] border border-[#e0a96d] shadow-inner" />
             </div>
-
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-1.5">
-                <h4 className="text-xs md:text-sm font-bold text-[#f5eedc] truncate font-hindi-bold">
-                  {currentSong.title}
-                </h4>
-                <span className="px-1.5 py-0.2 rounded-full text-[8px] sm:text-[9px] font-extrabold uppercase bg-[#18232c] text-[#e0a96d] border border-[#e0a96d]/20 shrink-0">
-                  {currentSong.mood}
-                </span>
+            
+            {/* Live Playing Bars */}
+            {isPlaying && (
+              <div className="absolute -top-1 -right-1 flex items-end gap-0.5 bg-[#0c1319]/90 p-0.5 rounded-full border border-[#e0a96d]/40">
+                <span className="w-0.5 h-2 bg-[#e0a96d] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                <span className="w-0.5 h-1.5 bg-[#e0a96d] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                <span className="w-0.5 h-2.5 bg-[#e0a96d] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
               </div>
-              <p className="text-[10px] md:text-[11px] text-[#8a9aa8] truncate mt-0.5">
-                {currentSong.artist} {currentSong.album ? `• ${currentSong.album}` : ''}
-              </p>
-            </div>
-
-            <button
-              onClick={() => onToggleFavorite(currentSong.id)}
-              className={`p-1.5 sm:p-2 rounded-full transition-transform active:scale-95 shrink-0 ${
-                isFavorite ? 'text-rose-400 bg-rose-500/10' : 'text-[#8a9aa8] hover:text-[#f5eedc] hover:bg-white/5'
-              }`}
-              title={isFavorite ? "Remove from Favorites" : "Add to Favorites"}
-            >
-              <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
-            </button>
+            )}
           </div>
 
-          {/* Quick Play/Pause & Skip Buttons on Mobile (Shown right in row 1 on small screens) */}
-          <div className="flex md:hidden items-center gap-2 shrink-0">
+          <div className="min-w-0 flex-1">
+            <p className="text-xs sm:text-sm font-bold text-[#f5eedc] truncate font-hindi-bold leading-tight">
+              {currentSong.title}
+            </p>
+            <p className="text-[10px] text-[#8a9aa8] truncate mt-0.5">
+              {currentSong.artist}
+            </p>
+          </div>
+
+          <button
+            onClick={() => onToggleFavorite(currentSong.id)}
+            className={`p-1 rounded-full transition-transform active:scale-95 shrink-0 sm:ml-1 ${
+              isFavorite ? 'text-rose-400' : 'text-[#8a9aa8] hover:text-[#f5eedc]'
+            }`}
+            title={isFavorite ? "Remove Favorite" : "Add Favorite"}
+          >
+            <Heart className={`w-3.5 h-3.5 ${isFavorite ? 'fill-current' : ''}`} />
+          </button>
+        </div>
+
+        {/* CENTER: PLAYBACK CONTROLS & SEEK BAR */}
+        <div className="flex flex-col items-center gap-0.5 flex-1 max-w-xs min-w-0">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsShuffle(!isShuffle)}
+              className={`hidden sm:block p-1 rounded-full transition-all ${
+                isShuffle ? 'text-[#e0a96d]' : 'text-[#8a9aa8] hover:text-[#f5eedc]'
+              }`}
+              title="Shuffle"
+            >
+              <Shuffle className="w-3 h-3" />
+            </button>
+
             <button
               onClick={onPrevSong}
-              className="text-[#8a9aa8] hover:text-[#f5eedc] p-1"
+              className="text-[#8a9aa8] hover:text-[#f5eedc] transition-colors p-1"
               title="Previous Track"
             >
-              <SkipBack className="w-4 h-4" />
+              <SkipBack className="w-3.5 h-3.5" />
             </button>
 
             <button
               onClick={onTogglePlay}
-              className="w-8 h-8 rounded-full bg-[#e0a96d] text-[#0c1319] flex items-center justify-center active:scale-95 transition-all shadow-[0_0_15px_rgba(224,169,109,0.4)] font-bold"
+              className="w-8 h-8 rounded-full bg-[#e0a96d] text-[#0c1319] flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-[0_0_15px_rgba(224,169,109,0.5)] font-bold shrink-0"
               title={isPlaying ? "Pause" : "Play"}
             >
               {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
@@ -254,111 +245,43 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
 
             <button
               onClick={onNextSong}
-              className="text-[#8a9aa8] hover:text-[#f5eedc] p-1"
-              title="Next Track"
-            >
-              <SkipForward className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-
-        {/* PLAYER CONTROLS & SELECTION PROGRESS BAR */}
-        <div className="flex flex-col items-center gap-1 w-full md:w-1/2">
-          {/* Main Playback Buttons (Desktop Only) */}
-          <div className="hidden md:flex items-center gap-5">
-            <button
-              onClick={() => setIsShuffle(!isShuffle)}
-              className={`p-1.5 rounded-full transition-all ${
-                isShuffle ? 'text-[#e0a96d] bg-[#e0a96d]/10' : 'text-[#8a9aa8] hover:text-[#f5eedc]'
-              }`}
-              title="Shuffle"
-            >
-              <Shuffle className="w-3.5 h-3.5" />
-            </button>
-
-            <button
-              onClick={onPrevSong}
-              className="text-[#8a9aa8] hover:text-[#f5eedc] transition-colors p-1"
-              title="Previous Track"
-            >
-              <SkipBack className="w-4 h-4" />
-            </button>
-
-            <button
-              onClick={onTogglePlay}
-              className="w-10 h-10 rounded-full bg-[#e0a96d] text-[#0c1319] flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(224,169,109,0.4)] font-bold"
-              title={isPlaying ? "Pause" : "Play"}
-            >
-              {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
-            </button>
-
-            <button
-              onClick={onNextSong}
               className="text-[#8a9aa8] hover:text-[#f5eedc] transition-colors p-1"
               title="Next Track"
             >
-              <SkipForward className="w-4 h-4" />
+              <SkipForward className="w-3.5 h-3.5" />
             </button>
 
             <button
               onClick={() => setRepeatMode(repeatMode === 'off' ? 'all' : repeatMode === 'all' ? 'one' : 'off')}
-              className={`p-1.5 rounded-full transition-all ${
-                repeatMode !== 'off' ? 'text-[#e0a96d] bg-[#e0a96d]/10 font-bold' : 'text-[#8a9aa8] hover:text-[#f5eedc]'
+              className={`hidden sm:block p-1 rounded-full transition-all ${
+                repeatMode !== 'off' ? 'text-[#e0a96d] font-bold' : 'text-[#8a9aa8] hover:text-[#f5eedc]'
               }`}
               title={`Repeat Mode: ${repeatMode}`}
             >
-              <Repeat className="w-3.5 h-3.5" />
+              <Repeat className="w-3 h-3" />
             </button>
           </div>
 
-          {/* Glowing Seek & Time Display */}
-          <div className="flex items-center gap-2 w-full text-[10px] text-[#8a9aa8] font-mono tracking-wider">
-            <span className="w-7 text-right shrink-0">{formatTime(currentTime)}</span>
-            <div className="relative flex-1 flex items-center">
-              <input
-                type="range"
-                min="0"
-                max={duration || 180}
-                value={currentTime}
-                onChange={handleSeek}
-                className="w-full h-1.5 bg-[#18232c] rounded-full appearance-none cursor-pointer accent-[#e0a96d] focus:outline-none"
-              />
-            </div>
-            <span className="w-7 shrink-0">{formatTime(duration)}</span>
-
-            {/* Lyrics & Queue Mini Toggle Buttons on Mobile */}
-            <div className="flex md:hidden items-center gap-1.5 ml-1 shrink-0">
-              <button
-                onClick={() => setShowLyrics(!showLyrics)}
-                className={`p-1 rounded-lg text-[10px] border ${
-                  showLyrics 
-                    ? 'bg-[#e0a96d] text-[#0c1319] border-[#e0a96d] font-bold' 
-                    : 'bg-[#121c23] text-[#8a9aa8] border-white/10'
-                }`}
-                title="Lyrics"
-              >
-                <FileText className="w-3.5 h-3.5" />
-              </button>
-              <button
-                onClick={() => setShowQueue(!showQueue)}
-                className={`p-1 rounded-lg text-[10px] border ${
-                  showQueue 
-                    ? 'bg-[#e0a96d] text-[#0c1319] border-[#e0a96d] font-bold' 
-                    : 'bg-[#121c23] text-[#8a9aa8] border-white/10'
-                }`}
-                title="Queue"
-              >
-                <ListMusic className="w-3.5 h-3.5" />
-              </button>
-            </div>
+          {/* Mini Seek Slider */}
+          <div className="flex items-center gap-1.5 w-full text-[9px] text-[#8a9aa8] font-mono">
+            <span className="w-6 text-right shrink-0">{formatTime(currentTime)}</span>
+            <input
+              type="range"
+              min="0"
+              max={duration || 180}
+              value={currentTime}
+              onChange={handleSeek}
+              className="w-full h-1 bg-[#18232c] rounded-full appearance-none cursor-pointer accent-[#e0a96d] focus:outline-none"
+            />
+            <span className="w-6 shrink-0">{formatTime(duration)}</span>
           </div>
         </div>
 
-        {/* VOLUME, LYRICS & QUEUE ACTIONS (DESKTOP) */}
-        <div className="hidden md:flex items-center justify-end gap-3 w-1/4">
-          <div className="flex items-center gap-2 bg-[#121c23] px-3 py-1.5 rounded-full border border-white/10">
-            <button onClick={toggleMute} className="text-[#8a9aa8] hover:text-[#f5eedc] transition-colors">
-              {isMuted ? <VolumeX className="w-3.5 h-3.5 text-rose-400" /> : <Volume2 className="w-3.5 h-3.5" />}
+        {/* RIGHT: VOLUME, LYRICS & QUEUE BUTTONS */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          <div className="hidden md:flex items-center gap-1 bg-[#0c1319]/80 px-2 py-1 rounded-full border border-white/10">
+            <button onClick={toggleMute} className="text-[#8a9aa8] hover:text-[#f5eedc]">
+              {isMuted ? <VolumeX className="w-3 h-3 text-rose-400" /> : <Volume2 className="w-3 h-3" />}
             </button>
             <input
               type="range"
@@ -367,34 +290,32 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
               step="0.05"
               value={isMuted ? 0 : volume}
               onChange={handleVolumeChange}
-              className="w-16 h-1 bg-[#18232c] rounded-lg appearance-none cursor-pointer accent-[#e0a96d]"
+              className="w-12 h-1 bg-[#18232c] rounded-lg appearance-none cursor-pointer accent-[#e0a96d]"
             />
           </div>
 
           <button
             onClick={() => setShowLyrics(!showLyrics)}
-            className={`p-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all border ${
+            className={`p-1.5 rounded-full text-xs font-semibold transition-all border ${
               showLyrics 
-                ? 'bg-[#e0a96d] text-[#0c1319] border-[#e0a96d] shadow-md font-bold' 
-                : 'bg-[#121c23] text-[#8a9aa8] border-white/10 hover:text-[#f5eedc]'
+                ? 'bg-[#e0a96d] text-[#0c1319] border-[#e0a96d] font-bold' 
+                : 'bg-[#0c1319]/80 text-[#8a9aa8] border-white/10 hover:text-[#f5eedc]'
             }`}
             title="Lyrics"
           >
-            <FileText className="w-4 h-4" />
-            <span className="hidden lg:inline text-[11px]">Lyrics</span>
+            <FileText className="w-3.5 h-3.5" />
           </button>
 
           <button
             onClick={() => setShowQueue(!showQueue)}
-            className={`p-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all border ${
+            className={`p-1.5 rounded-full text-xs font-semibold transition-all border ${
               showQueue 
-                ? 'bg-[#e0a96d] text-[#0c1319] border-[#e0a96d] shadow-md font-bold' 
-                : 'bg-[#121c23] text-[#8a9aa8] border-white/10 hover:text-[#f5eedc]'
+                ? 'bg-[#e0a96d] text-[#0c1319] border-[#e0a96d] font-bold' 
+                : 'bg-[#0c1319]/80 text-[#8a9aa8] border-white/10 hover:text-[#f5eedc]'
             }`}
             title="Up Next Queue"
           >
-            <ListMusic className="w-4 h-4" />
-            <span className="hidden lg:inline text-[11px]">Queue</span>
+            <ListMusic className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>

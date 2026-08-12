@@ -170,15 +170,13 @@ export default function App() {
           id: doc.id,
           ...doc.data()
         } as Song));
-        const fsIds = new Set(firestoreSongs.map(s => s.id));
-        const combined = [...firestoreSongs, ...INITIAL_SONGS.filter(s => !fsIds.has(s.id))];
-        setSongs(combined);
+        setSongs(firestoreSongs);
       } else {
-        setSongs(INITIAL_SONGS);
+        setSongs([]);
       }
     }, (err) => {
-      console.log("Songs snapshot listener fallback:", err);
-      setSongs(INITIAL_SONGS);
+      console.log("Songs snapshot listener:", err);
+      setSongs([]);
     });
 
     // 4. Playlists collection snapshot
@@ -218,8 +216,12 @@ export default function App() {
 
   // Ensure currentSong is initialized
   useEffect(() => {
-    if (songs.length > 0 && !currentSong) {
-      setCurrentSong(songs[0]);
+    if (songs.length > 0) {
+      if (!currentSong || !songs.some(s => s.id === currentSong.id)) {
+        setCurrentSong(songs[0]);
+      }
+    } else {
+      setCurrentSong(null);
     }
   }, [songs, currentSong]);
 
@@ -313,6 +315,8 @@ export default function App() {
     };
 
     setSongs(prev => [newSong, ...prev]);
+    setCurrentSong(newSong);
+    setIsPlaying(true);
 
     try {
       await setDoc(doc(db, 'songs', newSong.id), newSong);

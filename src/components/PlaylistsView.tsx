@@ -98,8 +98,8 @@ export const PlaylistsView: React.FC<PlaylistsViewProps> = ({
 
       {/* CREATE PLAYLIST MODAL */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 bg-[#070c10]/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#121c23] border border-white/15 p-6 rounded-3xl max-w-md w-full">
+        <div className="fixed inset-0 z-[100] bg-[#070c10]/85 backdrop-blur-md flex items-center justify-center p-4 pb-24">
+          <div className="bg-[#121c23] border border-white/15 p-6 rounded-3xl max-w-md w-full shadow-2xl">
             <h3 className="text-lg font-normal text-[#f5eedc] mb-4 font-hindi-display">नयी स्ट्रीट प्लेलिस्ट बनाएं</h3>
             <form onSubmit={handleCreate} className="space-y-4 text-xs">
               <div>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Song, Playlist, GolaFlavour, Feedback, User, BackgroundImage } from '../types';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, PieChart, Pie, Cell } from 'recharts';
-import { ShieldCheck, Music, ShoppingBag, MessageSquarePlus, Users, BarChart3, Plus, Trash2, Lock, UserCheck, Sparkles, Check, Play, Mail, Image as ImageIcon, RefreshCw, Shuffle } from 'lucide-react';
+import { ShieldCheck, Music, ShoppingBag, MessageSquarePlus, Users, BarChart3, Plus, Trash2, Lock, UserCheck, Sparkles, Check, Play, Pause, Mail, Image as ImageIcon, RefreshCw, Shuffle, Upload, Wand2, FolderPlus, CheckCircle2, Volume2, FileAudio } from 'lucide-react';
 import { db, collection, getDocs, onSnapshot, ADMIN_EMAIL } from '../lib/firebase';
 
 interface AdminPanelProps {
@@ -56,6 +56,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   onSetCurrentBgImage
 }) => {
   const [adminTab, setAdminTab] = useState<'dashboard' | 'users' | 'songs' | 'playlists' | 'gola' | 'feedback' | 'emailAlerts' | 'backgrounds'>('dashboard');
+  const [isUploadingAudio, setIsUploadingAudio] = useState(false);
   const [registeredUsers, setRegisteredUsers] = useState<any[]>([]);
   const [emailAlerts, setEmailAlerts] = useState<any[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
@@ -367,61 +368,198 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
       {/* SONGS MANAGEMENT TAB */}
       {adminTab === 'songs' && (
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base font-normal text-[#f5eedc] font-hindi-display">Manage Songs Catalog ({songs.length})</h3>
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#131d25] border border-white/10 p-4 rounded-3xl">
+            <div>
+              <h3 className="text-base font-bold text-[#f5eedc] font-hindi-display flex items-center gap-2">
+                <Music className="w-5 h-5 text-[#e0a96d]" /> Songs Catalog ({songs.length})
+              </h3>
+              <p className="text-xs text-[#8a9aa8]">Easily add, test, or manage songs. Choose local files or paste MP3 links.</p>
+            </div>
             <button
               onClick={() => setShowAddSongModal(true)}
-              className="px-4 py-2 bg-[#e0a96d] text-[#0c1319] font-bold text-xs rounded-full flex items-center gap-1.5 shadow-md hover:brightness-110"
+              className="px-5 py-2.5 bg-[#e0a96d] text-[#0c1319] font-bold text-xs rounded-full flex items-center justify-center gap-2 shadow-lg hover:brightness-110 active:scale-95 transition-all shrink-0"
             >
-              <Plus className="w-4 h-4" /> Add New Song
+              <Plus className="w-4 h-4" />
+              <span>Add New Song</span>
             </button>
           </div>
 
+          {/* DIRECT AUDIO FILE UPLOADER BANNER */}
+          <div className="bg-[#121c23] border border-[#e0a96d]/30 p-4 sm:p-5 rounded-3xl space-y-3">
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <div className="flex items-center gap-2">
+                <FolderPlus className="w-5 h-5 text-[#e0a96d]" />
+                <h4 className="text-xs sm:text-sm font-bold text-[#f5eedc]">Upload Audio Tracks From Your Device</h4>
+              </div>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#e0a96d]/20 text-[#e0a96d] border border-[#e0a96d]/30 font-mono">
+                MP3 / WEBM / MP4 / M4A
+              </span>
+            </div>
+            <p className="text-xs text-[#8a9aa8]">
+              Upload any audio track from your computer or phone. The title and artist will be automatically extracted, saved, and ready to play across all devices!
+            </p>
+            <button
+              onClick={() => setShowAddSongModal(true)}
+              className="px-4 py-2 bg-[#e0a96d]/10 hover:bg-[#e0a96d]/20 text-[#e0a96d] border border-[#e0a96d]/40 text-xs font-bold rounded-xl flex items-center gap-2 transition-all"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Upload Audio Track Now</span>
+            </button>
+          </div>
+
+          {/* CURRENT CATALOG SONGS LIST */}
           {songs.length === 0 ? (
-            <div className="p-8 text-center bg-[#131d25] border border-white/10 rounded-2xl space-y-2">
-              <p className="text-xs text-[#8a9aa8]">No songs found in the database. Click <strong>"Add New Song"</strong> above to upload your first track!</p>
+            <div className="p-8 text-center bg-[#131d25] border border-white/10 rounded-3xl space-y-2">
+              <p className="text-xs text-[#8a9aa8]">No songs found in catalog. Click <strong>"Add New Song"</strong> or <strong>"Import"</strong> above!</p>
             </div>
           ) : (
             <div className="space-y-2">
+              <h4 className="text-xs font-bold text-[#8a9aa8] uppercase tracking-wider px-1">Active Song Catalog ({songs.length})</h4>
               {songs.map(s => (
-                <div key={s.id} className="p-3 rounded-2xl bg-[#131d25] border border-white/10 flex items-center justify-between">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <img src={s.coverUrl} alt={s.title} className="w-10 h-10 rounded-xl object-cover" referrerPolicy="no-referrer" />
-                    <div className="min-w-0">
-                      <h4 className="text-xs md:text-sm font-bold text-[#f5eedc] truncate">{s.title}</h4>
-                      <p className="text-[10px] md:text-xs text-[#8a9aa8] truncate">{s.artist} • {s.genre} • {s.language}</p>
+                <div key={s.id} className="p-3 rounded-2xl bg-[#131d25] border border-white/10 flex items-center justify-between gap-3 hover:border-white/20 transition-all">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <img src={s.coverUrl} alt={s.title} className="w-10 h-10 rounded-xl object-cover shrink-0" referrerPolicy="no-referrer" />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-xs md:text-sm font-bold text-[#f5eedc] truncate">{s.title}</h4>
+                        <span className="px-1.5 py-0.2 text-[9px] rounded bg-[#1c2832] text-[#e0a96d] border border-[#e0a96d]/20 uppercase shrink-0 font-mono">
+                          {s.mood}
+                        </span>
+                      </div>
+                      <p className="text-[10px] md:text-xs text-[#8a9aa8] truncate mt-0.5">
+                        {s.artist} &bull; {s.genre} &bull; {s.language}
+                      </p>
                     </div>
                   </div>
 
-                  <button
-                    onClick={() => onDeleteSong(s.id)}
-                    className="p-2 text-rose-400 hover:text-rose-300 transition-colors"
-                    title="Remove Song"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      onClick={() => onDeleteSong(s.id)}
+                      className="p-2 text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-xl transition-colors"
+                      title="Remove Song"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
           )}
 
-          {/* ADD SONG MODAL */}
+          {/* ADD SONG SMART MODAL */}
           {showAddSongModal && (
-            <div className="fixed inset-0 z-50 bg-[#070c10]/80 backdrop-blur-md flex items-center justify-center p-4">
-              <div className="bg-[#121c23] border border-white/15 p-6 rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-                <h3 className="text-base font-normal text-[#f5eedc] mb-4 font-hindi-display flex items-center gap-2">
-                  <Music className="w-5 h-5 text-[#e0a96d]" /> Add Street Song
-                </h3>
-                <form onSubmit={handleAddSongSubmit} className="space-y-3 text-xs">
+            <div className="fixed inset-0 z-[100] bg-[#070c10]/90 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 pb-28 sm:pb-24 overflow-y-auto">
+              <div className="bg-[#121c23] border border-[#e0a96d]/40 p-5 sm:p-6 rounded-3xl max-w-lg w-full max-h-[80vh] overflow-y-auto shadow-[0_20px_60px_rgba(0,0,0,0.9)] space-y-4 my-auto relative">
+                
+                <div className="flex items-center justify-between border-b border-white/10 pb-3 sticky top-0 bg-[#121c23] z-10 pt-1">
+                  <h3 className="text-base font-bold text-[#f5eedc] font-hindi-display flex items-center gap-2">
+                    <Wand2 className="w-5 h-5 text-[#e0a96d]" /> Smart Add Song
+                  </h3>
+                  <button onClick={() => setShowAddSongModal(false)} className="text-[#8a9aa8] hover:text-white text-xs font-bold w-6 h-6 rounded-full bg-white/5 flex items-center justify-center">✕</button>
+                </div>
+
+                <form onSubmit={handleAddSongSubmit} className="space-y-3.5 text-xs">
+                  
+                  {/* UPLOAD & AUTO-EXTRACT BOX */}
+                  <div className="p-3.5 bg-[#0c1319] border border-dashed border-[#e0a96d]/40 rounded-2xl space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-[#e0a96d] flex items-center gap-1.5">
+                        <FileAudio className="w-4 h-4" /> Upload Local Audio File
+                      </span>
+                      <span className="text-[10px] text-[#8a9aa8]">Auto-Extracts Title & Artist</span>
+                    </div>
+
+                    <label className="cursor-pointer bg-[#18232c] hover:bg-[#1f2d38] border border-white/10 p-3 rounded-xl text-center text-[#f5eedc] text-xs transition-colors flex flex-col items-center justify-center gap-1">
+                      <Upload className="w-5 h-5 text-[#e0a96d]" />
+                      <span className="font-semibold text-xs">Choose MP3 / WEBM / MP4 / M4A file</span>
+                      <span className="text-[10px] text-[#8a9aa8]">Or drag and drop audio file here</span>
+                      <input
+                        type="file"
+                        accept="audio/*,video/mp4,video/webm,.webm,.mp4,.mp3,.m4a"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            // Smart auto-parse Title & Artist from filename!
+                            let rawName = file.name.replace(/\.[^/.]+$/, "");
+                            rawName = rawName.replace(/_(256|320)kbps|official_audio|official_video|official|live_from.*|a_song_on_the_ukulele_low/gi, "");
+                            
+                            let extractedArtist = 'Desi Artist';
+                            let extractedTitle = rawName;
+
+                            if (rawName.includes('_-_')) {
+                              const parts = rawName.split('_-_');
+                              extractedArtist = parts[0].replace(/_/g, ' ').trim();
+                              extractedTitle = parts[1].replace(/_/g, ' ').trim();
+                            } else if (rawName.includes(' - ')) {
+                              const parts = rawName.split(' - ');
+                              extractedArtist = parts[0].trim();
+                              extractedTitle = parts[1].trim();
+                            } else if (rawName.includes('_')) {
+                              extractedTitle = rawName.replace(/_/g, ' ').trim();
+                            }
+
+                            setTitle(extractedTitle);
+                            setArtist(extractedArtist);
+
+                            setIsUploadingAudio(true);
+                            const reader = new FileReader();
+                            reader.onload = async (event) => {
+                              const dataUrl = event.target?.result as string;
+                              try {
+                                const res = await fetch('/api/upload-audio', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ filename: file.name, dataUrl })
+                                });
+                                const data = await res.json();
+                                if (data.success && data.audioUrl) {
+                                  setAudioUrl(data.audioUrl);
+                                } else {
+                                  setAudioUrl(dataUrl);
+                                }
+                              } catch (err) {
+                                setAudioUrl(dataUrl);
+                              } finally {
+                                setIsUploadingAudio(false);
+                              }
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                    </label>
+                    {isUploadingAudio && (
+                      <p className="text-[11px] text-[#e0a96d] font-bold text-center animate-pulse mt-1">
+                        Uploading audio track to server...
+                      </p>
+                    )}
+                  </div>
+
+                  {/* TITLE & ARTIST AUTO-FILLED FIELDS */}
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="text-[#8a9aa8] block mb-1">Song Title *</label>
-                      <input type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Highway Raat" className="w-full bg-[#0c1319] border border-white/10 p-2.5 rounded-xl text-[#f5eedc] focus:outline-none focus:border-[#e0a96d]" required />
+                      <input
+                        type="text"
+                        value={title}
+                        onChange={e => setTitle(e.target.value)}
+                        placeholder="e.g. Alag Aasmaan"
+                        className="w-full bg-[#0c1319] border border-white/10 p-2.5 rounded-xl text-[#f5eedc] focus:outline-none focus:border-[#e0a96d]"
+                        required
+                      />
                     </div>
                     <div>
                       <label className="text-[#8a9aa8] block mb-1">Artist Name *</label>
-                      <input type="text" value={artist} onChange={e => setArtist(e.target.value)} placeholder="e.g. Raju Street Singer" className="w-full bg-[#0c1319] border border-white/10 p-2.5 rounded-xl text-[#f5eedc] focus:outline-none focus:border-[#e0a96d]" required />
+                      <input
+                        type="text"
+                        value={artist}
+                        onChange={e => setArtist(e.target.value)}
+                        placeholder="e.g. Anuv Jain"
+                        className="w-full bg-[#0c1319] border border-white/10 p-2.5 rounded-xl text-[#f5eedc] focus:outline-none focus:border-[#e0a96d]"
+                        required
+                      />
                     </div>
                   </div>
 
@@ -466,69 +604,71 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     </select>
                   </div>
 
+                  {/* AUDIO URL / PRESET TRACKS */}
                   <div>
-                    <label className="text-[#8a9aa8] block mb-1 font-mono">Audio Track (Upload file or paste MP3 link)</label>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <label className="flex-1 cursor-pointer bg-[#18232c] hover:bg-[#1f2d38] border border-dashed border-amber-500/40 p-2.5 rounded-xl text-center text-amber-300 text-xs transition-colors flex items-center justify-center gap-1.5">
-                          <Upload className="w-4 h-4" />
-                          <span>Choose Audio File (MP3 / WEBM / MP4)</span>
-                          <input
-                            type="file"
-                            accept="audio/*,video/mp4,video/webm,.webm,.mp4,.mp3,.m4a"
-                            className="hidden"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) {
-                                const reader = new FileReader();
-                                reader.onload = (event) => {
-                                  if (event.target?.result) {
-                                    setAudioUrl(event.target.result as string);
-                                  }
-                                };
-                                reader.readAsDataURL(file);
-                              }
-                            }}
-                          />
-                        </label>
-                      </div>
-                      <input
-                        type="text"
-                        value={audioUrl}
-                        onChange={e => setAudioUrl(e.target.value)}
-                        placeholder="OR paste direct https://.../song.mp3 link"
-                        className="w-full bg-[#0c1319] border border-white/10 p-2.5 rounded-xl text-[#f5eedc] font-mono text-[11px]"
-                        required
-                      />
-                      <div className="flex items-center gap-1.5 flex-wrap text-[10px] text-[#8a9aa8]">
-                        <span>Presets:</span>
-                        <button
-                          type="button"
-                          onClick={() => setAudioUrl('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3')}
-                          className="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700"
-                        >
-                          🎵 SoundHelix Beats 1
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setAudioUrl('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3')}
-                          className="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700"
-                        >
-                          🔥 SoundHelix Beats 2
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setAudioUrl('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3')}
-                          className="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700"
-                        >
-                          🎸 SoundHelix Beats 3
-                        </button>
-                      </div>
+                    <label className="text-[#8a9aa8] block mb-1 font-mono">Audio URL or Path</label>
+                    <input
+                      type="text"
+                      value={audioUrl}
+                      onChange={e => setAudioUrl(e.target.value)}
+                      placeholder="/song/filename.mp3 OR https://.../song.mp3"
+                      className="w-full bg-[#0c1319] border border-white/10 p-2.5 rounded-xl text-[#f5eedc] font-mono text-[11px]"
+                      required
+                    />
+                    <div className="flex items-center gap-1.5 flex-wrap text-[10px] text-[#8a9aa8] mt-1">
+                      <span>Quick Test Links:</span>
+                      <button
+                        type="button"
+                        onClick={() => setAudioUrl('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3')}
+                        className="px-2 py-0.5 rounded bg-[#18232c] hover:bg-[#223240] text-[#e0a96d] border border-white/10"
+                      >
+                        🎵 SoundHelix 1
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setAudioUrl('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3')}
+                        className="px-2 py-0.5 rounded bg-[#18232c] hover:bg-[#223240] text-[#e0a96d] border border-white/10"
+                      >
+                        🔥 SoundHelix 2
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setAudioUrl('/song/Anuv_Jain_-_ALAG_AASMAAN_a_song_on_the_ukulele_low.mp4')}
+                        className="px-2 py-0.5 rounded bg-[#18232c] hover:bg-[#223240] text-[#e0a96d] border border-white/10"
+                      >
+                        🎸 Local Alag Aasmaan
+                      </button>
                     </div>
                   </div>
 
+                  {/* COVER IMAGE */}
                   <div>
-                    <label className="text-[#8a9aa8] block mb-1 font-mono">Cover Image URL</label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-[#8a9aa8] font-mono">Cover Image URL</label>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => setCoverUrl('https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=600')}
+                          className="text-[9px] px-1.5 py-0.5 bg-white/5 rounded hover:bg-white/10 text-[#e0a96d]"
+                        >
+                          Guitars
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setCoverUrl('https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=600')}
+                          className="text-[9px] px-1.5 py-0.5 bg-white/5 rounded hover:bg-white/10 text-[#e0a96d]"
+                        >
+                          Concert
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setCoverUrl('https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=600')}
+                          className="text-[9px] px-1.5 py-0.5 bg-white/5 rounded hover:bg-white/10 text-[#e0a96d]"
+                        >
+                          Street Vibe
+                        </button>
+                      </div>
+                    </div>
                     <input
                       type="text"
                       value={coverUrl}
@@ -551,9 +691,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     </div>
                   )}
 
-                  <div className="flex justify-end gap-2 pt-3 border-t border-white/10">
-                    <button type="button" onClick={() => setShowAddSongModal(false)} className="px-4 py-2 bg-[#18232c] text-[#8a9aa8] rounded-full">Cancel</button>
-                    <button type="submit" className="px-5 py-2 bg-[#e0a96d] text-[#0c1319] font-bold rounded-full shadow-md hover:brightness-110">Save & Publish Song</button>
+                  <div className="sticky bottom-0 bg-[#121c23] pt-3 pb-2 border-t border-white/10 flex justify-end gap-2 mt-4 z-10">
+                    <button type="button" onClick={() => setShowAddSongModal(false)} className="px-4 py-2 bg-[#18232c] text-[#8a9aa8] rounded-full hover:text-white transition-colors">Cancel</button>
+                    <button type="submit" className="px-5 py-2 bg-[#e0a96d] text-[#0c1319] font-bold rounded-full shadow-[0_0_15px_rgba(224,169,109,0.3)] hover:brightness-110 active:scale-95 transition-all">
+                      Save & Publish Song
+                    </button>
                   </div>
                 </form>
               </div>
