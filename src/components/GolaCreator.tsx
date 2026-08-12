@@ -370,10 +370,10 @@ export const GolaCreator: React.FC<GolaCreatorProps> = ({
               </div>
               <div className="min-w-0">
                 <p className="text-xs font-bold text-[#f5eedc] truncate">
-                  {currentSong ? currentSong.title : 'Gola & Chai Highway'}
+                  {currentSong ? currentSong.title : 'No Song Playing'}
                 </p>
                 <p className="text-[10px] text-[#e0a96d] truncate">
-                  {currentSong ? currentSong.artist : 'Raju & The Streetbeats'}
+                  {currentSong ? currentSong.artist : 'Select a song in Music Store'}
                 </p>
               </div>
             </div>

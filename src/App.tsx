@@ -88,8 +88,8 @@ export default function App() {
   };
 
   // Application Data States
-  const [songs, setSongs] = useState<Song[]>(INITIAL_SONGS);
-  const [playlists, setPlaylists] = useState<Playlist[]>(INITIAL_PLAYLISTS);
+  const [songs, setSongs] = useState<Song[]>([]);
+  const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [flavours, setFlavours] = useState<GolaFlavour[]>(INITIAL_FLAVOURS);
   const [toppings] = useState<GolaTopping[]>(INITIAL_TOPPINGS);
   const [containers] = useState<GolaContainer[]>(INITIAL_CONTAINERS);
@@ -106,10 +106,10 @@ export default function App() {
   });
 
   // Music Player State
-  const [currentSong, setCurrentSong] = useState<Song | null>(INITIAL_SONGS[0]);
+  const [currentSong, setCurrentSong] = useState<Song | null>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const [favorites, setFavorites] = useState<string[]>(['song_1', 'song_2']);
-  const [queue, setQueue] = useState<Song[]>(INITIAL_SONGS);
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const [queue, setQueue] = useState<Song[]>([]);
 
   // User Auth State
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -170,8 +170,9 @@ export default function App() {
           id: doc.id,
           ...doc.data()
         } as Song));
-        const fsIds = new Set(firestoreSongs.map(s => s.id));
-        setSongs([...firestoreSongs, ...INITIAL_SONGS.filter(s => !fsIds.has(s.id))]);
+        setSongs(firestoreSongs);
+      } else {
+        setSongs([]);
       }
     }, (err) => console.log("Songs snapshot listener:", err));
 
@@ -183,6 +184,8 @@ export default function App() {
           ...doc.data()
         } as Playlist));
         setPlaylists(firestorePlaylists);
+      } else {
+        setPlaylists([]);
       }
     }, (err) => console.log("Playlists snapshot listener:", err));
 

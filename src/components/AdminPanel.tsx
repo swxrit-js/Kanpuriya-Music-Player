@@ -378,27 +378,33 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             </button>
           </div>
 
-          <div className="space-y-2">
-            {songs.map(s => (
-              <div key={s.id} className="p-3 rounded-2xl bg-[#131d25] border border-white/10 flex items-center justify-between">
-                <div className="flex items-center gap-3 min-w-0">
-                  <img src={s.coverUrl} alt={s.title} className="w-10 h-10 rounded-xl object-cover" referrerPolicy="no-referrer" />
-                  <div className="min-w-0">
-                    <h4 className="text-xs md:text-sm font-bold text-[#f5eedc] truncate">{s.title}</h4>
-                    <p className="text-[10px] md:text-xs text-[#8a9aa8] truncate">{s.artist} • {s.genre} • {s.language}</p>
+          {songs.length === 0 ? (
+            <div className="p-8 text-center bg-[#131d25] border border-white/10 rounded-2xl space-y-2">
+              <p className="text-xs text-[#8a9aa8]">No songs found in the database. Click <strong>"Add New Song"</strong> above to upload your first track!</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {songs.map(s => (
+                <div key={s.id} className="p-3 rounded-2xl bg-[#131d25] border border-white/10 flex items-center justify-between">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <img src={s.coverUrl} alt={s.title} className="w-10 h-10 rounded-xl object-cover" referrerPolicy="no-referrer" />
+                    <div className="min-w-0">
+                      <h4 className="text-xs md:text-sm font-bold text-[#f5eedc] truncate">{s.title}</h4>
+                      <p className="text-[10px] md:text-xs text-[#8a9aa8] truncate">{s.artist} • {s.genre} • {s.language}</p>
+                    </div>
                   </div>
-                </div>
 
-                <button
-                  onClick={() => onDeleteSong(s.id)}
-                  className="p-2 text-rose-400 hover:text-rose-300 transition-colors"
-                  title="Remove Song"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
-          </div>
+                  <button
+                    onClick={() => onDeleteSong(s.id)}
+                    className="p-2 text-rose-400 hover:text-rose-300 transition-colors"
+                    title="Remove Song"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* ADD SONG MODAL */}
           {showAddSongModal && (
@@ -509,33 +515,39 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {playlists.map(pl => (
-              <div key={pl.id} className="p-4 rounded-2xl bg-[#131d25] border border-white/10 flex flex-col justify-between">
-                <div className="flex items-start gap-3">
-                  <img src={pl.coverUrl} alt={pl.title} className="w-16 h-16 rounded-xl object-cover shrink-0" referrerPolicy="no-referrer" />
-                  <div className="min-w-0 flex-1">
-                    <h4 className="text-sm font-bold text-[#f5eedc] truncate">{pl.title}</h4>
-                    <p className="text-xs text-[#8a9aa8] line-clamp-2 mt-0.5">{pl.description}</p>
-                    <span className="inline-block mt-2 text-[10px] bg-[#18232c] text-[#e0a96d] px-2 py-0.5 rounded-full font-mono">
-                      {pl.songs.length} Tracks
-                    </span>
+          {playlists.length === 0 ? (
+            <div className="p-8 text-center bg-[#131d25] border border-white/10 rounded-2xl space-y-2">
+              <p className="text-xs text-[#8a9aa8]">No playlists found in the database. Click <strong>"Create Official Playlist"</strong> above to make one!</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {playlists.map(pl => (
+                <div key={pl.id} className="p-4 rounded-2xl bg-[#131d25] border border-white/10 flex flex-col justify-between">
+                  <div className="flex items-start gap-3">
+                    <img src={pl.coverUrl} alt={pl.title} className="w-16 h-16 rounded-xl object-cover shrink-0" referrerPolicy="no-referrer" />
+                    <div className="min-w-0 flex-1">
+                      <h4 className="text-sm font-bold text-[#f5eedc] truncate">{pl.title}</h4>
+                      <p className="text-xs text-[#8a9aa8] line-clamp-2 mt-0.5">{pl.description}</p>
+                      <span className="inline-block mt-2 text-[10px] bg-[#18232c] text-[#e0a96d] px-2 py-0.5 rounded-full font-mono">
+                        {pl.songs.length} Tracks
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between">
+                    <span className="text-[10px] text-[#6b7b8a]">By {pl.createdByName || 'Admin'}</span>
+                    <button
+                      onClick={() => onDeletePlaylist(pl.id)}
+                      className="p-1.5 text-rose-400 hover:text-rose-300 transition-colors"
+                      title="Delete Playlist"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
-
-                <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between">
-                  <span className="text-[10px] text-[#6b7b8a]">By {pl.createdByName || 'Admin'}</span>
-                  <button
-                    onClick={() => onDeletePlaylist(pl.id)}
-                    className="p-1.5 text-rose-400 hover:text-rose-300 transition-colors"
-                    title="Delete Playlist"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
           {/* ADD PLAYLIST MODAL */}
           {showAddPlaylistModal && (

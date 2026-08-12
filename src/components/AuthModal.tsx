@@ -35,7 +35,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onLoginSuccess })
       onClose();
     } catch (err: any) {
       console.error("Google Auth error:", err);
-      setError(err.message || 'Google sign in failed. Please try again.');
+      if (err.code === 'auth/unauthorized-domain') {
+        setError('Unauthorized Domain: Add "localhost" or your current domain to Firebase Console > Authentication > Settings > Authorized Domains.');
+      } else {
+        setError(err.message || 'Google sign in failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -73,6 +77,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onLoginSuccess })
       let errMsg = 'Authentication failed.';
       if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
         errMsg = 'Invalid email or password. Please check your credentials.';
+      } else if (err.code === 'auth/unauthorized-domain') {
+        errMsg = 'Unauthorized Domain: Add "localhost" (or your local host/IP) to Firebase Console > Authentication > Settings > Authorized Domains.';
       } else if (err.code === 'auth/email-already-in-use') {
         errMsg = 'An account with this email already exists. Try logging in.';
       } else if (err.code === 'auth/weak-password') {

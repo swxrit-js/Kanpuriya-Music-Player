@@ -107,107 +107,111 @@ export const MusicDiscovery: React.FC<MusicDiscoveryProps> = ({
       </div>
 
       {/* TRENDING NOW SECTION */}
-      <section className="mb-10">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-normal text-[#f5eedc] flex items-center gap-2 font-hindi-display">
-            🔥 Trending Street Beats
-          </h2>
-          <span className="text-xs text-[#8a9aa8]">Popular tracks on the street</span>
-        </div>
+      {trendingSongs.length > 0 && (
+        <section className="mb-10">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-normal text-[#f5eedc] flex items-center gap-2 font-hindi-display">
+              🔥 Trending Street Beats
+            </h2>
+            <span className="text-xs text-[#8a9aa8]">Popular tracks on the street</span>
+          </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {trendingSongs.map(song => {
-            const isSelected = currentSong?.id === song.id;
-            const isFav = favorites.includes(song.id);
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {trendingSongs.map(song => {
+              const isSelected = currentSong?.id === song.id;
+              const isFav = favorites.includes(song.id);
 
-            return (
-              <div
-                key={song.id}
-                className={`p-4 rounded-2xl bg-slate-900/90 border transition-all duration-300 hover:-translate-y-1 group relative overflow-hidden ${
-                  isSelected
-                    ? 'border-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.25)]'
-                    : 'border-slate-800 hover:border-slate-700'
-                }`}
-              >
-                <div className="relative aspect-square rounded-xl overflow-hidden mb-3">
-                  <img
-                    src={song.coverUrl}
-                    alt={song.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    referrerPolicy="no-referrer"
-                  />
-                  {/* Overlay Play button */}
-                  <button
-                    onClick={() => onPlaySong(song)}
-                    className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
-                  >
-                    <div className="w-12 h-12 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center shadow-xl transform scale-90 group-hover:scale-100 transition-transform">
-                      {isSelected && isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
-                    </div>
-                  </button>
+              return (
+                <div
+                  key={song.id}
+                  className={`p-4 rounded-2xl bg-slate-900/90 border transition-all duration-300 hover:-translate-y-1 group relative overflow-hidden ${
+                    isSelected
+                      ? 'border-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.25)]'
+                      : 'border-slate-800 hover:border-slate-700'
+                  }`}
+                >
+                  <div className="relative aspect-square rounded-xl overflow-hidden mb-3">
+                    <img
+                      src={song.coverUrl}
+                      alt={song.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      referrerPolicy="no-referrer"
+                    />
+                    {/* Overlay Play button */}
+                    <button
+                      onClick={() => onPlaySong(song)}
+                      className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
+                    >
+                      <div className="w-12 h-12 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center shadow-xl transform scale-90 group-hover:scale-100 transition-transform">
+                        {isSelected && isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
+                      </div>
+                    </button>
 
-                  <span className="absolute top-2 left-2 bg-slate-950/80 backdrop-blur-md px-2 py-0.5 rounded-md text-[10px] font-bold text-amber-300 border border-amber-500/30 uppercase">
-                    {song.mood}
-                  </span>
-                </div>
-
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <h3 className="text-sm font-bold text-slate-100 truncate">{song.title}</h3>
-                    <p className="text-xs text-slate-400 truncate mt-0.5">{song.artist}</p>
+                    <span className="absolute top-2 left-2 bg-slate-950/80 backdrop-blur-md px-2 py-0.5 rounded-md text-[10px] font-bold text-amber-300 border border-amber-500/30 uppercase">
+                      {song.mood}
+                    </span>
                   </div>
 
-                  <button
-                    onClick={() => onToggleFavorite(song.id)}
-                    className={`p-1 rounded-full ${isFav ? 'text-red-500' : 'text-slate-500 hover:text-slate-300'}`}
-                  >
-                    <Heart className={`w-4 h-4 ${isFav ? 'fill-current' : ''}`} />
-                  </button>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <h3 className="text-sm font-bold text-slate-100 truncate">{song.title}</h3>
+                      <p className="text-xs text-slate-400 truncate mt-0.5">{song.artist}</p>
+                    </div>
+
+                    <button
+                      onClick={() => onToggleFavorite(song.id)}
+                      className={`p-1 rounded-full ${isFav ? 'text-red-500' : 'text-slate-500 hover:text-slate-300'}`}
+                    >
+                      <Heart className={`w-4 h-4 ${isFav ? 'fill-current' : ''}`} />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* FEATURED PLAYLISTS SECTION */}
-      <section className="mb-10">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-normal text-[#f5eedc] flex items-center gap-2 font-hindi-display">
-            ✨ Curated Street Playlists
-          </h2>
-        </div>
+      {playlists.length > 0 && (
+        <section className="mb-10">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-normal text-[#f5eedc] flex items-center gap-2 font-hindi-display">
+              ✨ Curated Street Playlists
+            </h2>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {playlists.map(pl => (
-            <div
-              key={pl.id}
-              onClick={() => onSelectPlaylist(pl)}
-              className="p-5 rounded-3xl bg-[#131d25] border border-white/10 hover:border-[#e0a96d]/40 transition-all cursor-pointer group flex flex-col justify-between"
-            >
-              <div>
-                <img
-                  src={pl.coverUrl}
-                  alt={pl.title}
-                  className="w-full h-40 object-cover rounded-2xl mb-4 group-hover:scale-[1.02] transition-transform"
-                  referrerPolicy="no-referrer"
-                />
-                <h3 className="text-base font-bold text-[#f5eedc] group-hover:text-[#e0a96d] transition-colors">
-                  {pl.title}
-                </h3>
-                <p className="text-xs text-[#8a9aa8] mt-1 line-clamp-2">
-                  {pl.description}
-                </p>
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {playlists.map(pl => (
+              <div
+                key={pl.id}
+                onClick={() => onSelectPlaylist(pl)}
+                className="p-5 rounded-3xl bg-[#131d25] border border-white/10 hover:border-[#e0a96d]/40 transition-all cursor-pointer group flex flex-col justify-between"
+              >
+                <div>
+                  <img
+                    src={pl.coverUrl}
+                    alt={pl.title}
+                    className="w-full h-40 object-cover rounded-2xl mb-4 group-hover:scale-[1.02] transition-transform"
+                    referrerPolicy="no-referrer"
+                  />
+                  <h3 className="text-base font-bold text-[#f5eedc] group-hover:text-[#e0a96d] transition-colors">
+                    {pl.title}
+                  </h3>
+                  <p className="text-xs text-[#8a9aa8] mt-1 line-clamp-2">
+                    {pl.description}
+                  </p>
+                </div>
 
-              <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-xs text-[#8a9aa8]">
-                <span>{pl.songs.length} Tracks</span>
-                <span className="text-[#e0a96d] font-semibold group-hover:underline">Listen Now &rarr;</span>
+                <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-xs text-[#8a9aa8]">
+                  <span>{pl.songs.length} Tracks</span>
+                  <span className="text-[#e0a96d] font-semibold group-hover:underline">Listen Now &rarr;</span>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* ALL SONGS CATALOG (FILTERED) */}
       <section>
@@ -216,6 +220,18 @@ export const MusicDiscovery: React.FC<MusicDiscoveryProps> = ({
             🎶 Song Catalog ({filteredSongs.length})
           </h2>
         </div>
+
+        {filteredSongs.length === 0 ? (
+          <div className="p-8 text-center bg-[#131d25] border border-white/10 rounded-3xl space-y-3">
+            <div className="w-12 h-12 rounded-full bg-[#e0a96d]/10 text-[#e0a96d] flex items-center justify-center mx-auto text-xl">
+              <Music className="w-6 h-6" />
+            </div>
+            <h3 className="text-base font-bold text-[#f5eedc]">No Songs Added Yet</h3>
+            <p className="text-xs text-[#8a9aa8] max-w-sm mx-auto">
+              There are currently no songs in the store. Log in as Admin to upload your real audio tracks and albums!
+            </p>
+          </div>
+        ) : (
 
         <div className="space-y-2">
           {filteredSongs.map((song, index) => {
@@ -266,6 +282,7 @@ export const MusicDiscovery: React.FC<MusicDiscoveryProps> = ({
             );
           })}
         </div>
+        )}
       </section>
     </div>
   );
